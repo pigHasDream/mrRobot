@@ -3,39 +3,47 @@
 import RPi.GPIO as GPIO
 import time
 
-try :
-  GPIO.setmode(GPIO.BOARD)
+class DistCL : 
+    def __init__(self) :
+        GPIO.setmode(GPIO.BOARD)
 
-  PIN_TRIGGER = 29
-  PIN_ECHO = 31
-  cmPerSec = 17150
+        self.PIN_TRIGGER = 29
+        self.PIN_ECHO = 31
+        self.cmPerSec = 17150
 
-  GPIO.setup(PIN_TRIGGER, GPIO.OUT)
-  GPIO.setup(PIN_ECHO, GPIO.IN)
+        GPIO.setup(self.PIN_TRIGGER, GPIO.OUT)
+        GPIO.setup(self.PIN_ECHO, GPIO.IN)
+        GPIO.output(self.PIN_TRIGGER, GPIO.LOW)
 
-  GPIO.output(PIN_TRIGGER, GPIO.LOW)
+    def getDist(self) :
+        print("Waiting for sensor to settle")
+        time.sleep(0.01)
 
-  print("Waiting for sensor to settle")
+        print("Calculating distance")
+        GPIO.output(self.PIN_TRIGGER, GPIO.HIGH)
+        time.sleep(0.00001)
+        GPIO.output(self.PIN_TRIGGER, GPIO.LOW)
 
-  time.sleep(0.01)
+        while GPIO.input(self.PIN_ECHO) == 0 :
+            pulse_start_time = time.time()
+        while GPIO.input(self.PIN_ECHO) == 1:
+            pulse_end_time = time.time()
 
-  print("Calculating distance")
+        pulse_duration = pulse_end_time - pulse_start_time
+        distance = round(pulse_duration * self.cmPerSec, 2)
+        print(distance)
 
-  GPIO.output(PIN_TRIGGER, GPIO.HIGH)
+        return distance
 
-  time.sleep(0.00001)
+if __name__ == "__main__" :
+    distObj = DistCL()
 
-  GPIO.output(PIN_TRIGGER, GPIO.LOW)
+    for _ in range(6) :
+        time.sleep(2)
+        distObj.getDist()
 
-  while GPIO.input(PIN_ECHO)==0:
-     pulse_start_time = time.time()
-  while GPIO.input(PIN_ECHO)==1:
-     pulse_end_time = time.time()
+    GPIO.cleanup()
+  
 
-  pulse_duration = pulse_end_time - pulse_start_time
-  distance = round(pulse_duration * cmPerSec, 2)
 
-  print(distance)
 
-finally:
-  GPIO.cleanup()
