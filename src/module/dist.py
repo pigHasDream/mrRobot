@@ -5,19 +5,22 @@ import time
 
 class DistCL : 
     def __init__(self) :
-        GPIO.setmode(GPIO.BOARD)
+        GPIO.setmode(GPIO.BCM)
 
-        self.PIN_TRIGGER = 29
-        self.PIN_ECHO = 31
+        self.PIN_TRIGGER = 5
+        self.PIN_ECHO = 6
         self.cmPerSec = 17150
 
         GPIO.setup(self.PIN_TRIGGER, GPIO.OUT)
         GPIO.setup(self.PIN_ECHO, GPIO.IN)
         GPIO.output(self.PIN_TRIGGER, GPIO.LOW)
 
+    def __del__(self) :
+        GPIO.cleanup()
+
     def getDist(self) :
         print("Waiting for sensor to settle")
-        time.sleep(0.01)
+        time.sleep(0.05)
 
         print("Calculating distance")
         GPIO.output(self.PIN_TRIGGER, GPIO.HIGH)
@@ -41,9 +44,6 @@ if __name__ == "__main__" :
     for _ in range(6) :
         time.sleep(2)
         distObj.getDist()
-
-    GPIO.cleanup()
-  
 
 
 
